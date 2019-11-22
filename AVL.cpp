@@ -32,7 +32,7 @@ void AVL::Insert(const char* x)
 	// If the root is null, then we create a new node and stop the insert here
 	if (root == nullptr)
 	{
-		Node* y = new Node(x, 0, nullptr, nullptr, 0);
+		Node* y = new Node(x, 1, nullptr, nullptr, 0);
 		root = y;
 		return;
 	}
@@ -76,7 +76,7 @@ void AVL::Insert(const char* x)
 	}
 
 	// If we reach here, then current node is NULL. Which is fine, we need to make a new node anyways...
-	Node* y = new Node(x, 0, nullptr, nullptr, 0);
+	Node* y = new Node(x, 1, nullptr, nullptr, 0);
 
 	// Based upon currentNodeParent, we will either place this new node as its left or right child
 	if (strcmp(x, q->data) < 0)
@@ -400,12 +400,10 @@ int AVL::TraverseUnique(Node* node)
 
 	if (node == nullptr)
 		return 0;
-	if (node->count < 2)
-		return 0;
 
 	int leftSideUnique = TraverseUnique(node->left);
 	int rightSideUnique = TraverseUnique(node->right);
-	return leftSideUnique + rightSideUnique + 1;
+	return leftSideUnique + rightSideUnique + ((node->count > 1) ? 1 : 0);
 }
 
 int AVL::ComputeHeight(Node* node)
@@ -435,9 +433,4 @@ AVL::Node::Node(const char* name, const int count, Node* left, Node* right, int 
 	this->left = left;
 	this->right = right;
 	this->bf = balanceFactor;
-}
-
-bool AVL::Node::IsLeaf()
-{
-	return left == nullptr && right == nullptr;
 }

@@ -8,15 +8,47 @@
 
 #include <string.h>
 #include <iostream>
+#include <fstream>
 #include <assert.h>
 #include "BTree.h"
 
-BTree::BTree() : root{ nullptr }, keyComparisonCount{ 0 }, bfChangeCount{ 0 }
+using namespace std;
+
+BTree::BTree(const char* filePath)
 {
+	/*
+	 * Constructor for the B-Tree.
+	 * This function will open the file located at the supplied filePath. If none exists, it will make a new one.
+	 * If the file is unable to be opened it will throw the failbit in the tree.
+	*/
+
+	this->filePath = filePath;
+	fstream file;
+	file.open(filePath, ios::binary);
+	if (file.fail())
+	{
+		cout << "Unable to open input file" << endl;
+		badBit = true;
+	}
+	file.close();
 }
 
 void BTree::Insert(const char* x)
 {
+	Node r = root;
+
+	if (root.n == 2 * T - 1)
+	{
+		Node s = Node();
+		root = s;
+		s.leaf = false;
+		s.n = 0;
+		s.c[1] = r;
+		SplitChild(s, 1);
+		InsertNonFull(s, k);
+	}
+	else
+		InsertNonFull(r, k);
 }
 
 void BTree::Search(const char* cArray)
@@ -31,6 +63,13 @@ void BTree::Search(const char* cArray)
 		std::cout << node->data << ' ' << node->count << std::endl;
 	else
 		std::cout << cArray << " 0" << std::endl;
+}
+
+void BTree::SplitChild(Node x, int i)
+{
+	Node z = AllocateNode();
+	Node y = x.c[i];
+
 }
 
 int BTree::GetHeight()
@@ -53,18 +92,12 @@ int BTree::GetNonUnique()
 	return TraverseNonUnique(root);
 }
 
-BTree::Node* BTree::Find(const char* cArray)
+bool BTree::BadBit()
 {
-	/*
-	 * Used for searching the tree when you want to get a node pointer back as opposed to just a string.
-	 * Parameter<str> The string to search for
-	 * Returns the node that contains the supplied string, or NULL if not found
-	*/
-
-	return nullptr;
+	return badBit;
 }
 
-int BTree::TraverseNonUnique(Node* node)
+int BTree::TraverseNonUnique(Node node)
 {
 	/*
 	 * Traverses the tree (or subtree), calls Traversal on it's children, and returns the count of nodes.
@@ -74,7 +107,7 @@ int BTree::TraverseNonUnique(Node* node)
 	return 0;
 }
 
-int BTree::TraverseUnique(Node* node)
+int BTree::TraverseUnique(Node node)
 {
 	/*
 	 * Traverses the tree (or subtree), calls Traversal on it's children, and returns the count of nodes that have multiple items.
@@ -84,25 +117,11 @@ int BTree::TraverseUnique(Node* node)
 	return 0;
 }
 
-int BTree::ComputeHeight(Node* node)
+int BTree::ComputeHeight(Node node)
 {
 	/*
 	 * Trivial recursive traversal function. It calculates the height.
 	*/
 
 	return 0;
-}
-
-BTree::Node::Node(const char* name, const int count, Node* left, Node* right, int balanceFactor)
-{
-	std::strcpy(this->data, name);
-	this->count = count;
-	this->left = left;
-	this->right = right;
-	this->bf = balanceFactor;
-}
-
-bool BTree::Node::IsLeaf()
-{
-	return left == nullptr && right == nullptr;
 }

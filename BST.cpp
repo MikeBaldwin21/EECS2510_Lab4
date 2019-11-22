@@ -19,7 +19,7 @@ void BST::Insert(const char* cArray)
 	/*
 	 *	Inserts a string into the tree. If the string already exists, then it will increment it's count.
 	 *	Parameter:
-	 *		<str> This is the string to insert into the tree
+	 *		<cArray> This is the string to insert into the tree
 	*/
 
 	// If the tree is empty, then we add this node as the root
@@ -73,6 +73,57 @@ void BST::Insert(const char* cArray)
 	}
 }
 
+//void BST::Insert(const char* cArray)
+//{
+//	/*
+//	 *	Inserts a string into the tree. If the string already exists, then it will increment it's count.
+//	 *	Parameter:
+//	 *		<cArray> This is the string to insert into the tree
+//	*/
+//
+//	Node *p;
+//	Node *q;
+//
+//	if(root == nullptr)
+//	{
+//		q = new Node(cArray, 1, nullptr, nullptr, nullptr);
+//		root = q;
+//		return;
+//	}
+//
+//	p = root;
+//	do
+//	{
+//		if(strcmp(cArray, p->name) == 0)
+//		{
+//			p->count++;
+//			return;
+//		}
+//		if(strcmp(cArray, p->name) > 0)
+//		{
+//			if(p->right != nullptr)
+//				p = p->right;
+//			else
+//			{
+//				q = new Node(cArray, 1, p, nullptr, nullptr);
+//				p->right = q;
+//				return;
+//			}
+//		}
+//		if(strcmp(cArray, p->name) < 0)
+//		{
+//			if(p->left != nullptr)
+//				p = p->left;
+//			else
+//			{
+//				q = new Node(cArray, 1, p, nullptr, nullptr);
+//				p->left = q;
+//				return;
+//			}
+//		}
+//	} while(true);
+//}
+
 void BST::Search(const char* cArray)
 {
 	/*
@@ -89,21 +140,37 @@ void BST::Search(const char* cArray)
 
 int BST::GetHeight()
 {
+	/*
+	 *	Gets the height of the tree
+	*/
+
 	return ComputeHeight(root);
 }
 
 int BST::GetApproxWorkDone()
 {
+	/*
+	 *	Gets the height of the tree
+	*/
+
 	return keyComparisonCount + nodeLinkChangeCount;
 }
 
 int BST::GetUnique()
 {
+	/*
+	 *	Gets the number of nodes in the tree that are unique
+	*/
+
 	return TraverseUnique(root);
 }
 
 int BST::GetNonUnique()
 {
+	/*
+	 *	Gets the number of nodes in the tree
+	*/
+
 	return TraverseNonUnique(root);
 }
 
@@ -154,21 +221,10 @@ int BST::TraverseUnique(Node* node)
 
 	if (node == nullptr)
 		return 0;
-	if (node->count < 2)
-		return 0;
 
 	int leftSideUnique = TraverseUnique(node->left);
 	int rightSideUnique = TraverseUnique(node->right);
-	return leftSideUnique + rightSideUnique + 1;
-
-	/*if (node != nullptr)
-	{
-		if (node->left != nullptr)
-			TraverseNonUnique(node->left);
-		std::cout << node->name << ' ' << node->count << std::endl;
-		if (node->right != nullptr)
-			TraverseNonUnique(node->right);
-	}*/
+	return leftSideUnique + rightSideUnique + ((node->count > 1) ? 1 : 0);
 }
 
 int BST::ComputeHeight(Node* node)
@@ -179,12 +235,10 @@ int BST::ComputeHeight(Node* node)
 
 	if (node == nullptr)
 		return 0;
-	else
-	{
-		int leftHeight = ComputeHeight(node->left);
-		int rightHeight = ComputeHeight(node->right);
-		return (leftHeight > rightHeight) ? (leftHeight + 1) : (rightHeight + 1);
-	}
+
+	int leftHeight = ComputeHeight(node->left);
+	int rightHeight = ComputeHeight(node->right);
+	return (leftHeight > rightHeight) ? (leftHeight + 1) : (rightHeight + 1);
 }
 
 BST::Node::Node(const char* name, const int count, Node* parent, Node* left, Node* right)
@@ -194,14 +248,4 @@ BST::Node::Node(const char* name, const int count, Node* parent, Node* left, Nod
 	this->parent = parent;
 	this->left = left;
 	this->right = right;
-}
-
-bool BST::Node::IsRoot()
-{
-	return parent == nullptr;
-}
-
-bool BST::Node::IsLeaf()
-{
-	return left == nullptr && right == nullptr;
 }

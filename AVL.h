@@ -32,7 +32,6 @@ private:
 		int bf;
 		
 		Node(const char* name, const int count, Node* left, Node* right, int balanceFactor);
-		bool IsLeaf();
 	};
 
 	Node* root;
@@ -43,4 +42,3 @@ private:
 	int TraverseUnique(Node* node);
 	int ComputeHeight(Node* node);
 };
-#pragma once

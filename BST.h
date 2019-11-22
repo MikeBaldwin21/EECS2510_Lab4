@@ -32,8 +32,6 @@ private:
 		Node* right;
 		
 		Node(const char* name, const int count, Node* parent, Node* left, Node* right);
-		bool IsRoot();
-		bool IsLeaf();
 	};
 
 	Node* root;
