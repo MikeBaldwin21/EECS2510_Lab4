@@ -13,6 +13,8 @@
 constexpr int T = 3;
 constexpr int KEY_MIN = T - 1;
 constexpr int KEY_MAX = 2 * T - 1;
+constexpr int MAX_NODES = 3;
+constexpr int KEY_LENGTH = 32;
 static_assert(T % 2 != 0, "T must be an odd number!"); // According to Lecture 16 - slide #16 (Last sentence)
 static_assert(T >= 2, "T must be greater than 2!");
 static_assert(KEY_MIN <= KEY_MAX, "KEY_MIN must be less than or equal to KEY_MAX!");
@@ -34,19 +36,32 @@ private:
 	struct Node
 	{
 		int recordId;
+		// The number of keys currently stored in the node
 		int n;
-		int c[T]; // Array of numbers that point to the correct "record" in the B-Tree file
+		// The keys themselves (n keys). Stored in non-decreasing order
+		char keys[KEY_MAX][KEY_LENGTH];
+		// n + 1 pointers to this nodes children
+		int c[KEY_MAX];
+		// Boolean value that is TRUE if this node is a leaf, or false if not
 		bool leaf;
-		
-		//Node(const char* name, const int count, Node* left, Node* right, int isLeaf);
+		// Data stored in the node, this is the "name" of the node
+		char *data;
+		// Amount of times the data showes in the node
+		int count;
+
+		int GetKeyCount();
 	};
 
 	Node root;
+	Node nodes[MAX_NODES];
+	// NodeIndex is used to keep track of which node to replace in the array of loaded nodes
+	int nodeIndex;
 	const char* filePath;
 	unsigned int keyComparisonCount;
 	unsigned int bfChangeCount;
 	int badBit;
 	Node AllocateNode();
+	Node Search(Node x, const char* k);
 	void SplitChild(Node x, int i);
 	int TraverseNonUnique(Node node);
 	int TraverseUnique(Node node);
