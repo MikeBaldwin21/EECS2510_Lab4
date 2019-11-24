@@ -48,6 +48,16 @@ void BTree::Insert(const char* cArray)
 {
 	Node r = DiskRead(rootRecordId); // Load the root from memory
 
+	for (int j = 1; j < r.n + 1; j++)
+	{
+		if (strcmp(cArray, r.keys[j]) == 0)
+		{
+			r.count++;
+			DiskWrite(r);
+			return;
+		}
+	}
+
 	if (r.n == 2 * T - 1)
 	{
 		Node s = DiskRead(AllocateNode());
@@ -124,7 +134,7 @@ void BTree::InsertNonFull(int recordId, const char* cArray)
 void BTree::SplitChild(int recordId, int i)
 {
 	Node x = DiskRead(recordId);
-	Node z = AllocateNode();
+	Node z = DiskRead(AllocateNode());
 	Node y = DiskRead(x.childRecordId[i]);
 
 	z.isLeaf = y.isLeaf;
