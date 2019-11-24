@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <string>
 #include "BTree.h"
+#include "BTreeNode.h"
 
 using namespace std;
 
@@ -37,7 +38,7 @@ BTree::BTree(const char* filePath)
 
 	readCount = writeCount = 0;
 	rootRecordId = nextRecordId = 1;
-	Node root = AllocateNode();
+	BTreeNode root = AllocateNode();
 	root.isLeaf = true;
 	root.n = 0;
 	DiskWrite(root);
@@ -45,7 +46,7 @@ BTree::BTree(const char* filePath)
 
 void BTree::Insert(const char* cArray)
 {
-	Node r = DiskRead(rootRecordId); // Load the root from memory
+	BTreeNode r = DiskRead(rootRecordId); // Load the root from memory
 
 	/*for (int j = 1; j < r.n + 1; j++)
 	{
@@ -59,7 +60,7 @@ void BTree::Insert(const char* cArray)
 
 	if (r.n == 2 * T - 1)
 	{
-		Node s = AllocateNode();
+		BTreeNode s = AllocateNode();
 		rootRecordId = s.recordId;
 		s.isLeaf = false;
 		s.n = 0;
@@ -74,7 +75,7 @@ void BTree::Insert(const char* cArray)
 
 void BTree::InsertNonFull(int recordId, const char* cArray)
 {
-	Node x = DiskRead(recordId);
+	BTreeNode x = DiskRead(recordId);
 
 	for (int j = 1; j < x.n + 1; j++)
 	{
@@ -108,7 +109,7 @@ void BTree::InsertNonFull(int recordId, const char* cArray)
 		i++;
 		if (x.childRecordId[i] != 0)
 		{
-			Node c1 = DiskRead(x.childRecordId[i]);
+			BTreeNode c1 = DiskRead(x.childRecordId[i]);
 			if (c1.n == 2 * T - 1)
 			{
 				SplitChild(x.recordId, i);
@@ -128,13 +129,13 @@ void BTree::InsertNonFull(int recordId, const char* cArray)
 
 void BTree::SplitChild(int recordId, int i)
 {
-	Node x = DiskRead(recordId);
-	Node z = AllocateNode();
-	Node y = DiskRead(x.childRecordId[i]);
+	BTreeNode x = DiskRead(recordId);
+	BTreeNode z = AllocateNode();
+	BTreeNode y = DiskRead(x.childRecordId[i]);
 
 	z.isLeaf = y.isLeaf;
-	z.n = T - 1;
-	for (int j = 1; j <= T - 1; j++)
+	z.n = KEY_MIN;
+	for (int j = 1; j <= KEY_MIN; j++)
 	{
 		memcpy(z.keys[j], y.keys[j + T], sizeof(y.keys[j + T]));
 		memset(y.keys[j + T], 0, sizeof(y.keys[j + T]));
@@ -149,7 +150,7 @@ void BTree::SplitChild(int recordId, int i)
 		}
 	}
 
-	y.n = T - 1;
+	y.n = KEY_MIN;
 	for (int j = x.n + 1; j >= i + 1; j--)
 		x.childRecordId[j + 1] = x.childRecordId[j];
 	/*if(x.n + 1 >= i + 1)
@@ -178,7 +179,7 @@ void BTree::Search(const char* cArray)
 	 * Parameter<str> The string to search for
 	*/
 
-	Node node = Search(rootRecordId, cArray);
+	BTreeNode node = Search(rootRecordId, cArray);
 	std::cout << cArray << ' ' << node.count << std::endl;
 }
 
@@ -189,7 +190,7 @@ int BTree::Search(int recordId, const char* cArray)
 	 * Parameter<str> The string to search for
 	*/
 
-	Node x = DiskRead(recordId);
+	BTreeNode x = DiskRead(recordId);
 	int i = 1;
 	while (i <= x.n && strcmp(cArray, x.keys[i]) > 0)
 		i++;
@@ -204,10 +205,9 @@ int BTree::Search(int recordId, const char* cArray)
 	}
 }
 
-BTree::Node BTree::AllocateNode()
+BTreeNode BTree::AllocateNode()
 {
-	int prevRecordId = nextRecordId;
-	Node node = Node(nextRecordId);
+	BTreeNode node = BTreeNode(nextRecordId);
 	nextRecordId++;
 	DiskWrite(node);
 	return node;
@@ -262,7 +262,7 @@ int BTree::ComputeHeight(int recordId)
 	return 0;
 }
 
-BTree::Node BTree::DiskRead(int recordId)
+BTreeNode BTree::DiskRead(int recordId)
 {
 	readCount++;
 	ifstream inputStream;
@@ -274,8 +274,8 @@ BTree::Node BTree::DiskRead(int recordId)
 	}
 
 	// The size of a single node
-	Node node = Node();
-	long nodeSize = sizeof(Node);
+	BTreeNode node = BTreeNode();
+	long nodeSize = sizeof(BTreeNode);
 	long fileSize = GetFileSize(filePath);
 	long nodeStartPos = nodeSize * (recordId - 1); // Minus 1 because the node at spot 'zero' is NULL
 
@@ -283,7 +283,7 @@ BTree::Node BTree::DiskRead(int recordId)
 	{
 		cout << "ReadPos is past the end of the file!" << endl;
 		assert(false); // Used for debugging purposes (Assert's are stripped on release build)
-		return Node();
+		return BTreeNode();
 	}
 
 	inputStream.seekg(nodeStartPos);
@@ -319,7 +319,7 @@ BTree::Node BTree::DiskRead(int recordId)
 	return node;
 }
 
-void BTree::DiskWrite(Node node)
+void BTree::DiskWrite(BTreeNode node)
 {
 	assert(node.recordId != 0);
 	writeCount++;
@@ -332,7 +332,7 @@ void BTree::DiskWrite(Node node)
 	}
 
 	//Grab the size of a single node, this is what we will use to figure out the writing location
-	long nodeSize = sizeof(Node);
+	long nodeSize = sizeof(BTreeNode);
 	// Size of the B-Tree disk file
 	long fileSize = GetFileSize(filePath);
 	long nodeStartPos = nodeSize * (node.recordId - 1); // Minus 1 because the node at spot 'zero' is NULL
@@ -385,24 +385,6 @@ void BTree::DiskWrite(Node node)
 		outputStream.put(0);
 
 	outputStream.close();
-}
-
-BTree::Node::Node() : recordId{ 0 }, n{ 0 }, keys{}, childRecordId{}, isLeaf{ true }, count{ 1 }
-{
-	for (int i = 0; i < (2 * T - 1) + 1; i++)
-		for (int j = 0; j < 32; j++)
-			keys[i][j] = {};
-	for (int i = 0; i < (2 * T) + 1; i++)
-		childRecordId[i] = 0;
-}
-
-BTree::Node::Node(int recordId) : recordId{ recordId }, n{ 0 }, keys{}, childRecordId{}, isLeaf{ true }, count{ 1 }
-{
-	for (int i = 0; i < (2 * T - 1) + 1; i++)
-		for (int j = 0; j < 32; j++)
-			keys[i][j] = {};
-	for (int i = 0; i < (2 * T) + 1; i++)
-		childRecordId[i] = 0;
 }
 
 long GetFileSize(string filePath)

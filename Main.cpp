@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 		}
 		if (strcmp(command, "5") == 0)
 		{
-			RunBTreeInsertFromFile("Docs/Shakespeare.txt");
+			RunBTreeInsertFromFile("Docs/TEST.txt");
 		}
 	}
 	return 0;
