@@ -14,7 +14,7 @@ constexpr int T = 3;
 constexpr int KEY_MIN = T - 1;
 constexpr int KEY_MAX = 2 * T - 1;
 constexpr int MAX_NODES = 3;
-constexpr int KEY_LENGTH = 32;
+constexpr int MAX_DATA_LENGTH = 32;
 static_assert(T % 2 != 0, "T must be an odd number!"); // According to Lecture 16 - slide #16 (Last sentence)
 static_assert(T >= 2, "T must be greater than 2!");
 static_assert(KEY_MIN <= KEY_MAX, "KEY_MIN must be less than or equal to KEY_MAX!");
@@ -23,49 +23,51 @@ class BTree : Tree
 {
 public:
 	BTree(const char* filePath);
-	void Insert(const char* x);
+	void Insert(const char* cArray);
 	void Search(const char* cArray);
 	int GetHeight();
 	int GetApproxWorkDone();
 	int GetUnique();
 	int GetNonUnique();
-	bool BadBit();
 
 private:
 
 	struct Node
 	{
+		// This is the 'pointer' to this nodes memory location in the file
 		int recordId;
 		// The number of keys currently stored in the node
 		int n;
 		// The keys themselves (n keys). Stored in non-decreasing order
-		char keys[KEY_MAX][KEY_LENGTH];
-		// n + 1 pointers to this nodes children
-		int c[KEY_MAX];
-		// Boolean value that is TRUE if this node is a leaf, or false if not
-		bool leaf;
-		// Data stored in the node, this is the "name" of the node
-		char *data;
+		char keys[KEY_MAX][MAX_DATA_LENGTH];
+		// n + 1 'recordId' pointers to this nodes children
+		int childRecordId[KEY_MAX];
+		// Boolean value that is TRUE if this node is a isLeaf, or false if not
+		bool isLeaf;
 		// Amount of times the data showes in the node
 		int count;
 
-		int GetKeyCount();
+		Node();
+		Node(int recordId);
 	};
 
-	Node root;
-	Node nodes[MAX_NODES];
+	// This is the recordId of the node that is the root of the tree. NOTE: This is NOT always equal to 1!!!
+	int rootRecordId;
 	// NodeIndex is used to keep track of which node to replace in the array of loaded nodes
 	int nodeIndex;
+	// The path (including extension) to the on-disk file used to read/write
 	const char* filePath;
-	unsigned int keyComparisonCount;
-	unsigned int bfChangeCount;
-	int badBit;
-	Node AllocateNode();
-	Node Search(Node x, const char* k);
-	void SplitChild(Node x, int i);
-	int TraverseNonUnique(Node node);
-	int TraverseUnique(Node node);
-	int ComputeHeight(Node node);
-	void DiskWrite(Node node, int recordId);
+	// Tree variable that keeps track of which recordId to write next (a sort of incrmenting counter)
+	int nextRecordId;
+	int readCount;
+	int writeCount;
+	int AllocateNode();
+	int Search(int recordId, const char* cArray);
+	void SplitChild(int recordId, int i);
+	void InsertNonFull(int recordId, const char* cArray);
+	int TraverseNonUnique(int recordId);
+	int TraverseUnique(int recordId);
+	int ComputeHeight(int recordId);
 	Node DiskRead(int recordId);
+	void DiskWrite(Node node);
 };
