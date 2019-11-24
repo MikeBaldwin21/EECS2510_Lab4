@@ -26,7 +26,8 @@ void RunBTreeInsertFromFile(const char* filePath);
 
 int main(int argc, char* argv[])
 {
-	char command[50] = "";
+	RunBTreeInsertFromFile("Docs/Hamlet-Scene-1.txt");
+	/*char command[50] = "";
 
 	while (strcmp(command, "exit") != 0)
 	{
@@ -49,9 +50,9 @@ int main(int argc, char* argv[])
 		}
 		if (strcmp(command, "5") == 0)
 		{
-			RunBTreeInsertFromFile("Docs/TEST.txt");
+			RunBTreeInsertFromFile("Docs/Hamlet-Scene-1.txt");
 		}
-	}
+	}*/
 	return 0;
 }
 
@@ -90,6 +91,7 @@ bool RunCustomCommands()
 			}
 		}
 	}
+	return false;
 }
 
 void RunLoopInsert()
@@ -98,7 +100,6 @@ void RunLoopInsert()
 	AVL avlTree = AVL();
 	BTree bTree = BTree("TestDisk.txt");
 
-	char c;
 	char chari[10];
 	for (int i = 0; i < 10; i++) chari[i] = '\0';
 
@@ -136,7 +137,6 @@ void RunLoopInsertOnBTree()
 {
 	BTree bTree = BTree("TestDisk.txt");
 
-	char c;
 	char chari[10];
 	for (int i = 0; i < 10; i++) chari[i] = '\0';
 

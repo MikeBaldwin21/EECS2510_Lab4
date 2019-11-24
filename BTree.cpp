@@ -48,16 +48,6 @@ void BTree::Insert(const char* cArray)
 {
 	BTreeNode r = DiskRead(rootRecordId); // Load the root from memory
 
-	/*for (int j = 1; j < r.n + 1; j++)
-	{
-		if (strcmp(cArray, r.keys[j]) == 0)
-		{
-			r.count++;
-			DiskWrite(r);
-			return;
-		}
-	}*/
-
 	if (r.n == 2 * T - 1)
 	{
 		BTreeNode s = AllocateNode();
@@ -134,8 +124,8 @@ void BTree::SplitChild(int recordId, int i)
 	BTreeNode y = DiskRead(x.childRecordId[i]);
 
 	z.isLeaf = y.isLeaf;
-	z.n = KEY_MIN;
-	for (int j = 1; j <= KEY_MIN; j++)
+	z.n = MIN_KEY;
+	for (int j = 1; j <= MIN_KEY; j++)
 	{
 		memcpy(z.keys[j], y.keys[j + T], sizeof(y.keys[j + T]));
 		memset(y.keys[j + T], 0, sizeof(y.keys[j + T]));
@@ -150,7 +140,7 @@ void BTree::SplitChild(int recordId, int i)
 		}
 	}
 
-	y.n = KEY_MIN;
+	y.n = MIN_KEY;
 	for (int j = x.n + 1; j >= i + 1; j--)
 		x.childRecordId[j + 1] = x.childRecordId[j];
 	/*if(x.n + 1 >= i + 1)
@@ -302,11 +292,11 @@ BTreeNode BTree::DiskRead(int recordId)
 	inputStream.read(reinterpret_cast<char*>(&node.n), sizeof(node.n));
 
 	// Read 'keys'
-	for (int i = 0; i < (2 * T - 1) + 1; i++)
-		inputStream.read(reinterpret_cast<char*>(&node.keys[i]), sizeof(node.keys[i]));
+	for (int i = 0; i < MAX_KEY + 1; i++)
+		inputStream.read(reinterpret_cast<char*>(&node.keys[i]), MAX_DATA_LENGTH * sizeof(char));
 
 	// Read 'childRecordId'
-	for (int i = 0; i < (2 * T) + 1; i++)
+	for (int i = 0; i < MAX_CHILDREN + 1; i++)
 		inputStream.read(reinterpret_cast<char*>(&node.childRecordId[i]), sizeof(node.childRecordId[i]));
 
 	// Read 'isLeaf'
@@ -367,11 +357,11 @@ void BTree::DiskWrite(BTreeNode node)
 	outputStream.write(reinterpret_cast<const char*>(&node.n), sizeof(node.n));
 
 	// Write 'keys'
-	for (int i = 0; i < (2 * T - 1) + 1; i++)
-		outputStream.write(reinterpret_cast<const char*>(&node.keys[i]), sizeof(node.keys[i]));
+	for (int i = 0; i < MAX_KEY + 1; i++)
+		outputStream.write(reinterpret_cast<const char*>(&node.keys[i]), MAX_DATA_LENGTH * sizeof(char));
 
 	// Write 'childRecordId'
-	for (int i = 0; i < (2 * T) + 1; i++)
+	for (int i = 0; i < MAX_CHILDREN + 1; i++)
 		outputStream.write(reinterpret_cast<const char*>(&node.childRecordId[i]), sizeof(node.childRecordId[i]));
 
 	// Write 'isLeaf'

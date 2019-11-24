@@ -9,20 +9,24 @@
 #include <cstring>
 #include "BTreeNode.h"
 
-BTreeNode::BTreeNode() : recordId{ 0 }, n{ 0 }, keys{}, childRecordId{}, isLeaf{ true }, count{ 1 }
+BTreeNode::BTreeNode()
 {
-	for (int i = 0; i < (2 * T - 1) + 1; i++)
-		for (int j = 0; j < 32; j++)
-			keys[i][j] = {};
-	for (int i = 0; i < (2 * T) + 1; i++)
-		childRecordId[i] = 0;
+	recordId = 0;
+	n = 0;
+	isLeaf = true;
+	count = 1;
+	for (int i = 0; i < MAX_KEY + 1; i++)
+		memset(keys[i], 0, MAX_DATA_LENGTH * sizeof(char));
+	memset(childRecordId, 0, (MAX_CHILDREN + 1) * sizeof(int));
 }
 
-BTreeNode::BTreeNode(int recordId) : recordId{ recordId }, n{ 0 }, keys{}, childRecordId{}, isLeaf{ true }, count{ 1 }
+BTreeNode::BTreeNode(int recordId)
 {
-	for (int i = 0; i < (2 * T - 1) + 1; i++)
-		for (int j = 0; j < 32; j++)
-			keys[i][j] = {};
-	for (int i = 0; i < (2 * T) + 1; i++)
-		childRecordId[i] = 0;
+	this->recordId = recordId;
+	n = 0;
+	isLeaf = true;
+	count = 1;
+	for (int i = 0; i < MAX_KEY + 1; i++)
+		memset(keys[i], 0, MAX_DATA_LENGTH * sizeof(char));
+	memset(childRecordId, 0, (MAX_CHILDREN + 1) * sizeof(int));
 }
