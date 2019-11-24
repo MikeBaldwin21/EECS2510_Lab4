@@ -76,7 +76,7 @@ void BTree::InsertNonFull(int recordId, const char* cArray)
 {
 	Node x = DiskRead(recordId);
 
-	/*for (int j = 1; j < x.n + 1; j++)
+	for (int j = 1; j < x.n + 1; j++)
 	{
 		if (strcmp(cArray, x.keys[j]) == 0)
 		{
@@ -84,24 +84,19 @@ void BTree::InsertNonFull(int recordId, const char* cArray)
 			DiskWrite(x);
 			return;
 		}
-	}*/
+	}
 
 	int i = x.n;
 
 	if (x.isLeaf == true)
 	{
 		int j = i;
-		bool wasShifted = false;
 		while (i >= 1 && strcmp(cArray, x.keys[i]) < 0)
 		{
-			//strcpy(x.keys[i + 1], x.keys[i]);
 			memcpy(x.keys[i + 1], x.keys[i], sizeof(x.keys[i]));
+			memset(x.keys[i], 0, sizeof(x.keys[i]));
 			i--;
-			wasShifted = true;
 		}
-		if (wasShifted)
-			memset(x.keys[j], 0, sizeof(x.keys[j]));
-		//strcpy(x.keys[i + 1], cArray);
 		memcpy(x.keys[i + 1], cArray, sizeof(x.keys[i + 1]));
 		x.n++;
 		DiskWrite(x);
@@ -117,10 +112,11 @@ void BTree::InsertNonFull(int recordId, const char* cArray)
 			if (c1.n == 2 * T - 1)
 			{
 				SplitChild(x.recordId, i);
+				x = DiskRead(recordId);
 				if (strcmp(cArray, x.keys[i]) > 0)
 					i++;
 			}
-			InsertNonFull(c1.recordId, cArray);
+			InsertNonFull(x.childRecordId[i], cArray);
 		}
 		else
 		{
@@ -325,6 +321,7 @@ BTree::Node BTree::DiskRead(int recordId)
 
 void BTree::DiskWrite(Node node)
 {
+	assert(node.recordId != 0);
 	writeCount++;
 	fstream outputStream;
 	outputStream.open(filePath, ios::binary | ios::in | ios::out);

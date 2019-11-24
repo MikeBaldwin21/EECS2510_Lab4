@@ -10,7 +10,7 @@
 
 #include "Tree.h"
 
-constexpr int T = 2; // <=============== DR. THOMAS, ONLY CHANGE THIS!!! ===============\\ <=== Pump these rookie numbers up
+constexpr int T = 25; // <=============== DR. THOMAS, ONLY CHANGE THIS!!! ===============\\ <=== Pump these rookie numbers up
 
 //constexpr int KEY_MIN = T - 1; // Minimum amount of keys allowed per node
 //constexpr int KEY_MAX = (2 * T - 1) + 1; // Maximum amount of keys allowed per node
