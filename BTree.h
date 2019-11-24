@@ -10,7 +10,7 @@
 
 #include "Tree.h"
 
-constexpr int T = 3; // <=============== DR. THOMAS, ONLY CHANGE THIS!!! ===============\\ <=== Pump these rookie numbers up
+constexpr int T = 2; // <=============== DR. THOMAS, ONLY CHANGE THIS!!! ===============\\ <=== Pump these rookie numbers up
 
 //constexpr int KEY_MIN = T - 1; // Minimum amount of keys allowed per node
 //constexpr int KEY_MAX = (2 * T - 1) + 1; // Maximum amount of keys allowed per node
@@ -65,7 +65,7 @@ private:
 	int nextRecordId;
 	int readCount;
 	int writeCount;
-	int AllocateNode();
+	Node AllocateNode();
 	int Search(int recordId, const char* cArray);
 	void SplitChild(int recordId, int i);
 	void InsertNonFull(int recordId, const char* cArray);

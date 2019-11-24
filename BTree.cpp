@@ -37,8 +37,7 @@ BTree::BTree(const char* filePath)
 
 	readCount = writeCount = 0;
 	rootRecordId = nextRecordId = 1;
-	rootRecordId = AllocateNode();
-	Node root = DiskRead(rootRecordId);
+	Node root = AllocateNode();
 	root.isLeaf = true;
 	root.n = 0;
 	DiskWrite(root);
@@ -48,7 +47,7 @@ void BTree::Insert(const char* cArray)
 {
 	Node r = DiskRead(rootRecordId); // Load the root from memory
 
-	for (int j = 1; j < r.n + 1; j++)
+	/*for (int j = 1; j < r.n + 1; j++)
 	{
 		if (strcmp(cArray, r.keys[j]) == 0)
 		{
@@ -56,11 +55,11 @@ void BTree::Insert(const char* cArray)
 			DiskWrite(r);
 			return;
 		}
-	}
+	}*/
 
 	if (r.n == 2 * T - 1)
 	{
-		Node s = DiskRead(AllocateNode());
+		Node s = AllocateNode();
 		rootRecordId = s.recordId;
 		s.isLeaf = false;
 		s.n = 0;
@@ -77,7 +76,7 @@ void BTree::InsertNonFull(int recordId, const char* cArray)
 {
 	Node x = DiskRead(recordId);
 
-	for (int j = 1; j < x.n + 1; j++)
+	/*for (int j = 1; j < x.n + 1; j++)
 	{
 		if (strcmp(cArray, x.keys[j]) == 0)
 		{
@@ -85,7 +84,7 @@ void BTree::InsertNonFull(int recordId, const char* cArray)
 			DiskWrite(x);
 			return;
 		}
-	}
+	}*/
 
 	int i = x.n;
 
@@ -134,7 +133,7 @@ void BTree::InsertNonFull(int recordId, const char* cArray)
 void BTree::SplitChild(int recordId, int i)
 {
 	Node x = DiskRead(recordId);
-	Node z = DiskRead(AllocateNode());
+	Node z = AllocateNode();
 	Node y = DiskRead(x.childRecordId[i]);
 
 	z.isLeaf = y.isLeaf;
@@ -164,7 +163,7 @@ void BTree::SplitChild(int recordId, int i)
 	for (int j = x.n; j >= i; j--)
 	{
 		memcpy(x.keys[j + 1], x.keys[j], sizeof(x.keys[j]));
-		//memset(x.keys[j], 0, sizeof(x.keys[j]));
+		memset(x.keys[j], 0, sizeof(x.keys[j]));
 	}
 
 	memcpy(x.keys[i], y.keys[T], sizeof(y.keys[T]));
@@ -209,13 +208,13 @@ int BTree::Search(int recordId, const char* cArray)
 	}
 }
 
-int BTree::AllocateNode()
+BTree::Node BTree::AllocateNode()
 {
 	int prevRecordId = nextRecordId;
 	Node node = Node(nextRecordId);
 	nextRecordId++;
 	DiskWrite(node);
-	return prevRecordId;
+	return node;
 }
 
 int BTree::GetHeight()
@@ -385,13 +384,13 @@ void BTree::DiskWrite(Node node)
 	outputStream.write(reinterpret_cast<const char*>(&node.count), sizeof(node.count));
 
 	// There is bound to be some leftover 'padding' bytes at the end, due to how structures are represented in memory, just fill with zero's
-	while (outputStream.tellp() < nodeStartPos + nodeSize)
+	while (outputStream.tellp() < (long long)nodeStartPos + (long long)nodeSize)
 		outputStream.put(0);
 
 	outputStream.close();
 }
 
-BTree::Node::Node() : recordId{ 0 }, n{ 0 }, keys{}, childRecordId{}, isLeaf{ true }, count{ 0 }
+BTree::Node::Node() : recordId{ 0 }, n{ 0 }, keys{}, childRecordId{}, isLeaf{ true }, count{ 1 }
 {
 	for (int i = 0; i < (2 * T - 1) + 1; i++)
 		for (int j = 0; j < 32; j++)
@@ -400,7 +399,7 @@ BTree::Node::Node() : recordId{ 0 }, n{ 0 }, keys{}, childRecordId{}, isLeaf{ tr
 		childRecordId[i] = 0;
 }
 
-BTree::Node::Node(int recordId) : recordId{ recordId }, n{ 0 }, keys{}, childRecordId{}, isLeaf{ true }, count{ 0 }
+BTree::Node::Node(int recordId) : recordId{ recordId }, n{ 0 }, keys{}, childRecordId{}, isLeaf{ true }, count{ 1 }
 {
 	for (int i = 0; i < (2 * T - 1) + 1; i++)
 		for (int j = 0; j < 32; j++)
