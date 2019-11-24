@@ -36,7 +36,7 @@ private:
 	BTreeNode AllocateNode();
 	int Search(int recordId, const char* cArray);
 	void SplitChild(int recordId, int i);
-	void InsertNonFull(BTreeNode, const char* cArray);
+	void InsertNonFull(int recordId, const char* cArray);
 	int TraverseNonUnique(int recordId);
 	int TraverseUnique(int recordId);
 	int ComputeHeight(int recordId);
