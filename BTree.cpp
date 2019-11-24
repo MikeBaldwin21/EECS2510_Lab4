@@ -54,8 +54,9 @@ void BTree::Insert(const char* cArray)
 		rootRecordId = s.recordId;
 		s.isLeaf = false;
 		s.n = 0;
-		s.childRecordId[1] = r.recordId;
-		SplitChild(s.recordId, 1);
+		s.childRecordId[0] = r.recordId;
+		DiskWrite(s);
+		SplitChild(s.recordId, 0);
 		InsertNonFull(s.recordId, cArray);
 	}
 	else
@@ -77,23 +78,31 @@ void BTree::InsertNonFull(int recordId, const char* cArray)
 			i--;
 		}
 		//strcpy(x.keys[i + 1], cArray);
-		memcpy(x.keys[i + 1], cArray, sizeof(x.keys[i]));
+		memcpy(x.keys[i], cArray, MAX_DATA_LENGTH);
 		x.n++;
 		DiskWrite(x);
 	}
 	else
 	{
-		while (i >= 1 && strcmp(cArray, x.keys[i]) < 0)
+		while (i >= 0 && strcmp(cArray, x.keys[i]) < 0)
 			i--;
 		i++;
-		Node c1 = DiskRead(x.childRecordId[i]);
-		if (c1.n == KEY_MAX)
+		if (x.childRecordId[i] != 0)
 		{
-			SplitChild(x.recordId, i);
-			if (strcmp(cArray, x.keys[i]) > 0)
-				i++;
+			Node c1 = DiskRead(x.childRecordId[i]);
+			if (c1.n == KEY_MAX)
+			{
+				SplitChild(x.recordId, i);
+				if (strcmp(cArray, x.keys[i]) > 0)
+					i++;
+			}
+			InsertNonFull(c1.recordId, cArray);
 		}
-		InsertNonFull(c1.recordId, cArray);
+		else
+		{
+			cout << "Can't read from a 0 record!" << endl;
+			assert(false);
+		}
 	}
 }
 
@@ -101,25 +110,33 @@ void BTree::SplitChild(int recordId, int i)
 {
 	Node x = DiskRead(recordId);
 	Node z = AllocateNode();
-	Node y = x.childRecordId[i];
+	Node y = DiskRead(x.childRecordId[i]);
+
 	z.isLeaf = y.isLeaf;
 	z.n = KEY_MIN;
-	for (int j = 1; j < KEY_MIN; j++)
-		//strcpy(z.keys[i], y.keys[j + T]);
-		memcpy(z.keys[i], y.keys[j + T], sizeof(y.keys[j + T]));
+	for (int j = 0; j < KEY_MIN; j++)
+	{
+		memcpy(z.keys[j], y.keys[j + T], sizeof(y.keys[j + T]));
+		memset(y.keys[j + T], 0, sizeof(y.keys[j + T]));
+	}
+
 	if (y.isLeaf == false)
-		for (int j = 1; j < T; j++)
+		for (int j = 0; j < T; j++)
 			z.childRecordId[j] = y.childRecordId[j + T];
-	y.n = T - 1;
+
+
+	y.n = KEY_MIN;
 	for (int j = x.n + 1; j > i + 1; j--)
 		x.childRecordId[j + 1] = x.childRecordId[j];
 	x.childRecordId[i + 1] = z.recordId;
+
 	for (int j = x.n; j > i; j--)
-		//strcpy(x.keys[j + 1], x.keys[j]);
 		memcpy(x.keys[j + 1], x.keys[j], sizeof(x.keys[j]));
-	//strcpy(x.keys[i], y.keys[T]);
-	memcpy(x.keys[i], y.keys[T], sizeof(y.keys[T]));
+
+	memcpy(x.keys[i], y.keys[T - 1], sizeof(y.keys[T - 1]));
+	memset(y.keys[T - 1], 0, sizeof(y.keys[T - 1]));
 	x.n++;
+
 	DiskWrite(y);
 	DiskWrite(z);
 	DiskWrite(x);
@@ -277,7 +294,7 @@ void BTree::DiskWrite(Node node)
 {
 	writeCount++;
 	fstream outputStream;
-	outputStream.open(filePath, ios::binary | ios::out);
+	outputStream.open(filePath, ios::binary | ios::in | ios::out);
 	if (outputStream.fail())
 	{
 		cout << "Unable to open b-tree file for disk writes!" << endl;
