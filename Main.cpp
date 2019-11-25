@@ -11,157 +11,69 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
-#include "Tree.h"
 #include "BST.h"
 #include "AVL.h"
 #include "BTree.h"
+#include "Constants.h"
 
 using namespace std;
 
-bool RunCustomCommands();
-void RunLoopInsert();
-void RunLoopInsertOnBTree();
 void RunInsertFromFile(const char* filePath, int treeNum);
-void RunBTreeInsertFromFile(const char* filePath);
+int GetFileExtensionSize(string filePath);
 
 int main(int argc, char* argv[])
 {
-	RunBTreeInsertFromFile("Docs/Hamlet-Scene-1.txt");
-	/*char command[50] = "";
+	// I would only comment this out if you have about 5 hours to spare!!!!
 
-	while (strcmp(command, "exit") != 0)
+	/*string filePaths[] = { "Docs/A Bee Movie Script.txt", "Docs/ALL.txt", "Docs/Anna Karenina - Tolstoy.txt", "Docs/Bleak House - Dickens.txt", "Docs/David Copperfield - Dickens.txt", "Docs/Don Quixote - Cervantes.txt", "Docs/Green Eggs and Ham.txt", "Docs/Hamlet.txt", "Docs/Hamlet-Scene-1.txt", "Docs/King James Bible.txt", "Docs/Les Miserables - Hugo.txt", "Docs/Middlemarch - Eliot.txt", "Docs/Moby Dick - Melville.txt", "Docs/Shakespeare.txt", "Docs/TEST.txt", "Docs/The Brothers Karamazof - Dostoyevsky.txt", "Docs/The Hunchback of Notre Dame - Hugo.txt", "Docs/The Three Musketeers - Dumas.txt", "Docs/To Kill a Mockingbird - Harper Lee.txt", "Docs/War and Peace.txt" };*/
+
+
+
+	string filePaths[] = { "Docs/Green Eggs and Ham.txt", "Docs/Hamlet.txt", "Docs/Hamlet-Scene-1.txt", "Docs/TEST.txt", "Docs/To Kill a Mockingbird - Harper Lee.txt" };
+
+	for (int j = 0; j < 5; j++)
 	{
-		cout << endl << "Please enter in '1' for custom commands, '2' for Listing1(for(8200)), or '3' for Listing2(shakespeare.txt): ";
-		cin >> command;
-
-		if (strcmp(command, "1") == 0)
-			if (RunCustomCommands())
-				return 0;
-		if (strcmp(command, "2") == 0)
-			RunLoopInsert();
-		if (strcmp(command, "3") == 0)
-		{
-			for (int i = 0; i < 5; i++)
-				RunInsertFromFile("Docs/Shakespeare.txt", i);
-		}
-		if (strcmp(command, "4") == 0)
-		{
-			RunLoopInsertOnBTree();
-		}
-		if (strcmp(command, "5") == 0)
-		{
-			RunBTreeInsertFromFile("Docs/Hamlet-Scene-1.txt");
-		}
-	}*/
+		for (int i = 0; i < 5; i++)
+		RunInsertFromFile(filePaths[j].c_str(), i);
+	}
 	return 0;
-}
-
-bool RunCustomCommands()
-{
-	BST bstTree = BST();
-	AVL avlTree = AVL();
-	BTree bTree = BTree("TestDisk.txt");
-	char command[50] = "";
-
-	while (strcmp(command, "return") != 0)
-	{
-		cin >> command;
-
-		if (strlen(command) > 0)
-		{
-			if (strcmp(command, "insert") == 0)
-			{
-				char str2[50];
-				cin >> str2;
-				bstTree.Insert(str2);
-				avlTree.Insert(str2);
-				bTree.Insert(str2);
-			}
-			else if (strcmp(command, "search") == 0)
-			{
-				char str2[50];
-				cin >> str2;
-				bstTree.Search(str2);
-				avlTree.Search(str2);
-				bTree.Search(str2);
-			}
-			else if (strcmp(command, "exit") == 0)
-			{
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-void RunLoopInsert()
-{
-	BST bstTree = BST();
-	AVL avlTree = AVL();
-	BTree bTree = BTree("TestDisk.txt");
-
-	char chari[10];
-	for (int i = 0; i < 10; i++) chari[i] = '\0';
-
-	clock_t start = clock();
-	for (int i = 1001; i <= 9200; i++) // insert 8200 strings in BST
-	{
-		sprintf(chari, "%4i", i);
-		bstTree.Insert(chari);
-		cout << "Tree Height is now " << bstTree.GetHeight() << endl;
-	}
-	double BSTtime = ((double)(clock() - (double)start)) / CLOCKS_PER_SEC;
-	start = clock();
-	for (int i = 1001; i <= 9200; i++) // insert 8200 strings in AVL Tree
-	{
-		sprintf(chari, "%4i", i);
-		avlTree.Insert(chari);
-		cout << "Tree Height is now " << avlTree.GetHeight() << endl;
-	}
-	double AVLtime = ((double)(clock() - (double)start)) / CLOCKS_PER_SEC;
-	start = clock();
-	for (int i = 1001; i <= 9200; i++) // insert 8200 strings in BTree
-	{
-		sprintf(chari, "%4i", i);
-		bTree.Insert(chari);
-		cout << "Tree Height is now " << bTree.GetHeight() << endl;
-	}
-	double  bTreeTime = ((double)(clock() - (double)start)) / CLOCKS_PER_SEC;
-
-	cout << "BST Work[" << bstTree.GetApproxWorkDone() << "] - Time[" << BSTtime << "] - U-Nodes[" << bstTree.GetUnique() << "] - NU-Nodes[" << bstTree.GetNonUnique() << "]" << endl;
-	cout << "AVL Work[" << avlTree.GetApproxWorkDone() << "] - Time[" << AVLtime << "] - U-Nodes[" << avlTree.GetUnique() << "] - NU-Nodes[" << avlTree.GetNonUnique() << "]" << endl;
-	cout << "BTree Work[" << bTree.GetApproxWorkDone() << "] - Time[" << bTreeTime << "] - U-Nodes[" << bTree.GetUnique() << "] - NU-Nodes[" << bTree.GetNonUnique() << "]" << endl;
-}
-
-void RunLoopInsertOnBTree()
-{
-	BTree bTree = BTree("TestDisk.txt");
-
-	char chari[10];
-	for (int i = 0; i < 10; i++) chari[i] = '\0';
-
-	clock_t start = clock();
-	start = clock();
-	for (int i = 1001; i <= 9200; i++) // insert 8200 strings in BTree
-	{
-		sprintf(chari, "%4i", i);
-		bTree.Insert(chari);
-		cout << "Tree Height is now " << bTree.GetHeight() << endl;
-	}
-	double  bTreeTime = ((double)(clock() - (double)start)) / CLOCKS_PER_SEC;
-
-	cout << "BTree Work[" << bTree.GetApproxWorkDone() << "] - Time[" << bTreeTime << "] - U-Nodes[" << bTree.GetUnique() << "] - NU-Nodes[" << bTree.GetNonUnique() << "]" << endl;
 }
 
 void RunInsertFromFile(const char* filePath, int treeNum)
 {
-	BST bstTree = BST();
-	AVL avlTree = AVL();
-	BTree bTree = BTree("TestDisk.txt");
+	// The last sentence on the Lab4.pdf says we can use strings, deduct no points please!
+	string inputFilePath = filePath;
+	string outputFilePath;
+	int extSize = GetFileExtensionSize(filePath);
+	if (extSize > 0)
+		outputFilePath = inputFilePath.substr(0, inputFilePath.length() - extSize) + ".btree";
+	else
+		outputFilePath = inputFilePath + ".btree";
+
+	BST* bstTree = nullptr;
+	AVL* avlTree = nullptr;
+	BTree* bTree = nullptr;
+
+	switch (treeNum)
+	{
+	case 1:
+		cout << endl << "Input FilePath: " << inputFilePath << endl;
+		cout << "Output FilePath: " << outputFilePath << endl;
+		break;
+	case 2:
+		bstTree = new BST();
+		break;
+	case 3:
+		avlTree = new AVL();
+		break;
+	case 4:
+		bTree = new BTree(outputFilePath.c_str());
+		break;
+	}
 
 	char c;
-	char chari[50]; // assumes no word is longer than 49 characters
-	memset(chari, 0, 50); // zero the word buffer
+	char chari[MAX_DATA_LENGTH]; // assumes no word is longer than 49 characters
+	memset(chari, 0, sizeof(chari)); // zero the word buffer
 	int iPtr;
 	bool IsDelimiter = false, WasDelimiter = false;
 
@@ -185,17 +97,17 @@ void RunInsertFromFile(const char* filePath, int treeNum)
 			switch (treeNum)
 			{
 			case 2:
-				bstTree.Insert(chari);
+				bstTree->Insert(chari);
 				break;
 			case 3:
-				avlTree.Insert(chari);
+				avlTree->Insert(chari);
 				break;
 			case 4:
-				bTree.Insert(chari);
+				bTree->Insert(chari);
 				break;
 			}
 
-			memset(chari, 0, 50); // zero the word buffer
+			memset(chari, 0, sizeof(chari)); // zero the word buffer
 			iPtr = 0;
 		}
 		else if (!IsDelimiter) // if this isn’t a delimiter, keep going
@@ -215,64 +127,32 @@ void RunInsertFromFile(const char* filePath, int treeNum)
 
 	switch (treeNum)
 	{
-	case 1:
-		cout << "Time[" << timeSpent << "]" << endl;
-		break;
+		/*case 1:
+			cout << "Time[" << timeSpent << "]" << endl;
+			break;*/
 	case 2:
-		cout << "BST Work[" << bstTree.GetApproxWorkDone() << "] - Time[" << timeSpent << "] - U-Nodes[" << bstTree.GetUnique() << "] - NU-Nodes[" << bstTree.GetNonUnique() << "]" << endl;
+		cout << "BST Time[" << timeSpent << "] - BST Reads[" << bstTree->GetReadCount() << "] - BST Writes[" << bstTree->GetWriteCount() << "] - Total R/W[" << bstTree->GetReadCount() + bstTree->GetWriteCount() << "]" << endl;
+		delete bstTree;
 		break;
 	case 3:
-		cout << "AVL Work[" << avlTree.GetApproxWorkDone() << "] - Time[" << timeSpent << "] - U-Nodes[" << avlTree.GetUnique() << "] - NU-Nodes[" << avlTree.GetNonUnique() << "]" << endl;
+		cout << "AVL Time[" << timeSpent << "] - AVL Reads[" << avlTree->GetReadCount() << "] - AVL Writes[" << avlTree->GetWriteCount() << "] - Total R/W[" << avlTree->GetReadCount() + avlTree->GetWriteCount() << "]" << endl;
+		delete avlTree;
 		break;
 	case 4:
-		cout << "BTree Work[" << bTree.GetApproxWorkDone() << "] - Time[" << timeSpent << "] - U-Nodes[" << bTree.GetUnique() << "] - NU-Nodes[" << bTree.GetNonUnique() << "]" << endl;
+		cout << "BTree Time[" << timeSpent << "] - BTree Reads[" << bTree->GetReadCount() << "] - BTree Writes[" << bTree->GetWriteCount() << "] - Total R/W[" << bTree->GetReadCount() + bTree->GetWriteCount() << "]" << endl;
+		delete bTree;
 		break;
 	}
 }
 
-void RunBTreeInsertFromFile(const char* filePath)
+int GetFileExtensionSize(string filePath)
 {
-	BTree bTree = BTree("TestDisk.txt");
+	/*
+	 * Helper function to find the extension of a file (it it exists), from a file path
+	 */
 
-	char c;
-	char chari[32]; // assumes no word is longer than 32 characters
-	memset(chari, 0, 32); // zero the word buffer
-	int iPtr;
-	bool IsDelimiter = false, WasDelimiter = false;
-
-	clock_t start = clock();
-	ifstream inFile;
-	inFile.open(filePath, ios::binary);
-	if (inFile.fail())
-	{
-		cout << "Unable to open input file" << endl;
-		return;
-	}
-	iPtr = 0;
-	inFile.get(c); // priming read
-	while (!inFile.eof())
-	{
-		IsDelimiter = (c == ' ' || c == 10 || c == 13 || c == 9 || c == '.' || c == ',' || c == '!' || c == ';' || c == ':' || c == '(' || c == ')' || c == '?' || c == '-');
-		if (IsDelimiter && !WasDelimiter) // if THIS character IS a delimiter, and the last character WASN’T, it’s the end of a word
-		{
-			WasDelimiter = true;
-			bTree.Insert(chari);
-			memset(chari, 0, 32); // zero the word buffer
-			iPtr = 0;
-		}
-		else if (!IsDelimiter) // if this isn’t a delimiter, keep going
-		{
-			chari[iPtr] = c;
-			iPtr++;
-		}
-		else if (IsDelimiter && WasDelimiter)
-		{
-			// Do nothing -- two consecutive delimiters.
-		}
-		WasDelimiter = IsDelimiter; // for the NEXT iteration
-		inFile.get(c);
-	}
-	inFile.close();
-	double timeSpent = ((double)(clock() - (double)start)) / CLOCKS_PER_SEC;
-	cout << "BTree Work[" << bTree.GetApproxWorkDone() << "] - Time[" << timeSpent << "] - U-Nodes[" << bTree.GetUnique() << "] - NU-Nodes[" << bTree.GetNonUnique() << "]" << endl;
+	size_t lastDot = filePath.find_last_of('.'); // Find the last dot character
+	if (lastDot != string::npos) // If found, get the size of the extension and return that, else return 0
+		return filePath.length() - lastDot;
+	return 0;
 }

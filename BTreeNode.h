@@ -8,18 +8,7 @@
 
 #pragma once
 
-constexpr int T = 25; // <=============== DR. THOMAS, ONLY CHANGE THIS!!! ===============\\ <=== Pump these rookie numbers up
-
-constexpr int MIN_KEY = T - 1; // Minimum amount of keys allowed per node
-constexpr int MAX_KEY = (2 * T - 1); // Maximum amount of keys allowed per node
-constexpr int MIN_CHILDREN = T; // Minimum amount of children allowed per node
-constexpr int MAX_CHILDREN = (2 * T); // Maximum amount of children allowed per node
-constexpr int MAX_DATA_LENGTH = 32; // Largest word allocated (based upon PDF info)
-//static_assert(T % 2 != 0, "T must be an odd number!"); // According to Lecture 16 - slide #16 (Last sentence)
-static_assert(T >= 2, "T must be greater than 2!");
-static_assert(MIN_KEY <= MAX_KEY, "MIN_KEY must be less than or equal to MAX_KEY!");
-static_assert(T >= 2, "T must be greater than 2!");
-static_assert(MIN_CHILDREN <= MAX_CHILDREN, "MIN_CHILDREN must be less than or equal to MAX_DATA_LENGTH!");
+#include "Constants.h"
 
 class BTreeNode
 {
@@ -30,13 +19,14 @@ public:
 	int n;
 	// The keys themselves (n keys). Stored in non-decreasing order
 	char keys[MAX_KEY + 1][MAX_DATA_LENGTH];
+	// Amount of times a key shows in the node
+	int counts[MAX_KEY + 1];
 	// n + 1 'recordId' pointers to this nodes children
 	int childRecordId[MAX_CHILDREN + 1];
 	// Boolean value that is TRUE if this node is a isLeaf, or false if not
 	bool isLeaf;
-	// Amount of times the data showes in the node
-	int count;
 
 	BTreeNode();
 	BTreeNode(int recordId);
+	int GetKeyCount();
 };

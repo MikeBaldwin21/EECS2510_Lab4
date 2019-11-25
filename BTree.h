@@ -8,17 +8,17 @@
 
 #pragma once
 
-#include "Tree.h"
 #include "BTreeNode.h"
 
-class BTree : Tree
+class BTree
 {
 public:
 	BTree(const char* filePath);
 	void Insert(const char* cArray);
 	void Search(const char* cArray);
 	int GetHeight();
-	int GetApproxWorkDone();
+	int GetReadCount();
+	int GetWriteCount();
 	int GetUnique();
 	int GetNonUnique();
 

@@ -10,7 +10,7 @@
 #include <iostream>
 #include "BST.h"
 
-BST::BST() : root{ nullptr }, keyComparisonCount{ 0 }, nodeLinkChangeCount{ 0 }
+BST::BST() : root{ nullptr }, readCount{ 0 }, writeCount{ 0 }
 {
 }
 
@@ -25,7 +25,7 @@ void BST::Insert(const char* cArray)
 	// If the tree is empty, then we add this node as the root
 	if (root == nullptr)
 	{
-		nodeLinkChangeCount++;
+		writeCount++;
 		Node* newNode = new Node(cArray, 1, nullptr, nullptr, nullptr);
 		root = newNode;
 		return;
@@ -43,12 +43,12 @@ void BST::Insert(const char* cArray)
 	current = root;
 	while (current != nullptr)
 	{
-		keyComparisonCount++;
+		readCount++;
 		if (std::strcmp(cArray, current->name) < 0) // If less than, move to the left subtree
 		{
 			if (current->left == nullptr) // No node to the left, add a new one
 			{
-				nodeLinkChangeCount++;
+				writeCount++;
 				Node* newNode = new Node(cArray, 1, current, nullptr, nullptr);
 				current->left = newNode;
 				return;
@@ -61,7 +61,7 @@ void BST::Insert(const char* cArray)
 		{
 			if (current->right == nullptr) // No node to the right, add a new one
 			{
-				nodeLinkChangeCount++;
+				writeCount++;
 				Node* newNode = new Node(cArray, 1, current, nullptr, nullptr);
 				current->right = newNode;
 				return;
@@ -147,13 +147,22 @@ int BST::GetHeight()
 	return ComputeHeight(root);
 }
 
-int BST::GetApproxWorkDone()
+int BST::GetReadCount()
 {
 	/*
-	 *	Gets the height of the tree
+	 *	Gets the number of reads
 	*/
 
-	return keyComparisonCount + nodeLinkChangeCount;
+	return readCount;
+}
+
+int BST::GetWriteCount()
+{
+	/*
+	 *	Gets the number of writes
+	*/
+
+	return writeCount;
 }
 
 int BST::GetUnique()
@@ -185,31 +194,16 @@ BST::Node* BST::Find(const char* cArray)
 	Node* current = root;
 	while (current != nullptr) // 'Current' will be NULL if 'root == NULL', which is intended!
 	{
-		keyComparisonCount++;
+		readCount++;
 		if (std::strcmp(cArray, current->name) == 0)
 			return current;
-		keyComparisonCount++;
+		readCount++;
 		if (std::strcmp(cArray, current->name) < 0)
 			current = current->left;
 		else
 			current = current->right;
 	}
 	return current;
-}
-
-int BST::TraverseNonUnique(Node* node)
-{
-	/*
-	 * Traverses the tree (or subtree), calls Traversal on it's children, and returns the count of nodes.
-	 * Parameter<node> The node to start the traversal from (in this subtree)
-	*/
-
-	if (node == nullptr)
-		return 0;
-
-	int leftSideUnique = TraverseNonUnique(node->left);
-	int rightSideUnique = TraverseNonUnique(node->right);
-	return leftSideUnique + rightSideUnique + 1;
 }
 
 int BST::TraverseUnique(Node* node)
@@ -225,6 +219,21 @@ int BST::TraverseUnique(Node* node)
 	int leftSideUnique = TraverseUnique(node->left);
 	int rightSideUnique = TraverseUnique(node->right);
 	return leftSideUnique + rightSideUnique + ((node->count > 1) ? 1 : 0);
+}
+
+int BST::TraverseNonUnique(Node* node)
+{
+	/*
+	 * Traverses the tree (or subtree), calls Traversal on it's children, and returns the count of nodes.
+	 * Parameter<node> The node to start the traversal from (in this subtree)
+	*/
+
+	if (node == nullptr)
+		return 0;
+
+	int leftSideUnique = TraverseNonUnique(node->left);
+	int rightSideUnique = TraverseNonUnique(node->right);
+	return leftSideUnique + rightSideUnique + 1;
 }
 
 int BST::ComputeHeight(Node* node)

@@ -11,7 +11,7 @@
 #include <assert.h>
 #include "AVL.h"
 
-AVL::AVL() : root{ nullptr }, keyComparisonCount{ 0 }, bfChangeCount{ 0 }
+AVL::AVL() : root{ nullptr }, readCount{ 0 }, writeCount{ 0 }
 {
 }
 
@@ -57,7 +57,7 @@ void AVL::Insert(const char* x)
 
 	while (p != nullptr) // search tree for insertion point. We can't use the search function as we need to track the last non-zero bf node (and it's parent)
 	{
-		keyComparisonCount++;
+		readCount++;
 		if (strcmp(x, p->data) == 0) // Found a node that matches, just increment count and return (no balancing needed)
 		{
 			p->count++;
@@ -72,7 +72,7 @@ void AVL::Insert(const char* x)
 		// Advance the current node to it's next child (based upon the BT property). Also bring it's parent up to its old spot.
 		q = p;
 		p = strcmp(x, p->data) < 0 ? p->left : p->right;
-		keyComparisonCount++;
+		readCount++;
 	}
 
 	// If we reach here, then current node is NULL. Which is fine, we need to make a new node anyways...
@@ -83,7 +83,7 @@ void AVL::Insert(const char* x)
 		q->left = y;
 	else
 		q->right = y;
-	keyComparisonCount++;
+	readCount++;
 
 	//==============================================================
 	// TREE BALANCING
@@ -100,7 +100,7 @@ void AVL::Insert(const char* x)
 
 	Node* b; // This the child of the last non-zero branch factor node we encountered
 
-	keyComparisonCount++;
+	readCount++;
 	// Which way is the displacement
 	if (strcmp(x, a->data) > 0) // Is the new node on the right side of the lastNZBFNode
 	{
@@ -120,35 +120,35 @@ void AVL::Insert(const char* x)
 	{
 		assert(p != nullptr);
 
-		keyComparisonCount++;
+		readCount++;
 		// If newNode is on the right side of currentNode (which means the newnode is on the LEFT side of the currentNode)
 		if (strcmp(x, p->data) > 0)
 		{
 			// adjust BF and move forward
 			p->bf = -1;
 			p = p->right;
-			bfChangeCount++;
+			writeCount++;
 		}
 		else // If newNode is on the left side of currentNode (which means the newnode is on the RIGHT side of the currentNode)
 		{
 			// adjust BF and move forward
 			p->bf = 1;
 			p = p->left;
-			bfChangeCount++;
+			writeCount++;
 		}
 	}
 
 	// If the tree was completely balanced then all we do is set the new balance factor and return
 	if (a->bf == 0)
 	{
-		bfChangeCount++;
+		writeCount++;
 		a->bf = d; // Set the bf to ± 1 (the displacement tells us which direction)
 		return;
 	}
 	// If the tree already had a slight imbalance the OTHER way, then did the insertion throw the tree into complete balance. If so, set the BF to zero and return
 	if (a->bf == -d)
 	{
-		bfChangeCount++;
+		writeCount++;
 		a->bf = 0; // Set bf to zero and return
 		return;
 	}
@@ -164,7 +164,7 @@ void AVL::Insert(const char* x)
 			a->left = b->right;
 			b->right = a;
 			a->bf = b->bf = 0;
-			bfChangeCount += 2;
+			writeCount += 2;
 		}
 		else // LR rotation
 		{
@@ -190,7 +190,7 @@ void AVL::Insert(const char* x)
 				c->left = b;
 				a->left = b->right = nullptr;
 				a->bf = b->bf = c->bf = 0;
-				bfChangeCount += 3;
+				writeCount += 3;
 				break;
 			case 1: // CASE (b)
 				c->right = a;
@@ -200,7 +200,7 @@ void AVL::Insert(const char* x)
 				b->bf = 0;
 				c->bf = 0;
 				a->bf = -1;
-				bfChangeCount += 3;
+				writeCount += 3;
 				break;
 			case -1: // CASE (c)
 				c->right = a;
@@ -210,7 +210,7 @@ void AVL::Insert(const char* x)
 				b->bf = 1;
 				c->bf = 0;
 				a->bf = 0;
-				bfChangeCount += 3;
+				writeCount += 3;
 				break;
 			}
 
@@ -229,7 +229,7 @@ void AVL::Insert(const char* x)
 			a->right = b->left;
 			b->left = a;
 			a->bf = b->bf = 0;
-			bfChangeCount += 2;
+			writeCount += 2;
 		}
 		else
 		{
@@ -255,7 +255,7 @@ void AVL::Insert(const char* x)
 				c->right = b;
 				a->right = b->left = nullptr;
 				a->bf = b->bf = c->bf = 0;
-				bfChangeCount += 3;
+				writeCount += 3;
 				break;
 			case 1: // CASE (b)
 				c->left = a;
@@ -265,7 +265,7 @@ void AVL::Insert(const char* x)
 				a->bf = 0;
 				c->bf = 0;
 				b->bf = -1;
-				bfChangeCount += 3;
+				writeCount += 3;
 				break;
 			case -1: // CASE (c)
 				c->left = a;
@@ -275,7 +275,7 @@ void AVL::Insert(const char* x)
 				a->bf = 1;
 				c->bf = 0;
 				b->bf = 0;
-				bfChangeCount += 3;
+				writeCount += 3;
 				break;
 			}
 
@@ -338,9 +338,22 @@ int AVL::GetHeight()
 	return ComputeHeight(root);
 }
 
-int AVL::GetApproxWorkDone()
+int AVL::GetReadCount()
 {
-	return keyComparisonCount + bfChangeCount;
+	/*
+	 *	Gets the number of reads
+	*/
+
+	return readCount;
+}
+
+int AVL::GetWriteCount()
+{
+	/*
+	 *	Gets the number of writes
+	*/
+
+	return writeCount;
 }
 
 int AVL::GetUnique()
@@ -364,31 +377,16 @@ AVL::Node* AVL::Find(const char* cArray)
 	Node* current = root;
 	while (current != nullptr) //'Current' will be NULL if 'root == NULL', which is intended!
 	{
-		keyComparisonCount++;
+		readCount++;
 		if (std::strcmp(cArray, current->data) == 0)
 			return current;
-		keyComparisonCount++;
+		readCount++;
 		if (std::strcmp(cArray, current->data) < 0)
 			current = current->left;
 		else
 			current = current->right;
 	}
 	return current;
-}
-
-int AVL::TraverseNonUnique(Node* node)
-{
-	/*
-	 * Traverses the tree (or subtree), calls Traversal on it's children, and returns the count of nodes.
-	 * Parameter<node> The node to start the traversal from (in this subtree)
-	*/
-
-	if (node == nullptr)
-		return 0;
-
-	int leftSideUnique = TraverseNonUnique(node->left);
-	int rightSideUnique = TraverseNonUnique(node->right);
-	return leftSideUnique + rightSideUnique + 1;
 }
 
 int AVL::TraverseUnique(Node* node)
@@ -404,6 +402,21 @@ int AVL::TraverseUnique(Node* node)
 	int leftSideUnique = TraverseUnique(node->left);
 	int rightSideUnique = TraverseUnique(node->right);
 	return leftSideUnique + rightSideUnique + ((node->count > 1) ? 1 : 0);
+}
+
+int AVL::TraverseNonUnique(Node* node)
+{
+	/*
+	 * Traverses the tree (or subtree), calls Traversal on it's children, and returns the count of nodes.
+	 * Parameter<node> The node to start the traversal from (in this subtree)
+	*/
+
+	if (node == nullptr)
+		return 0;
+
+	int leftSideUnique = TraverseNonUnique(node->left);
+	int rightSideUnique = TraverseNonUnique(node->right);
+	return leftSideUnique + rightSideUnique + 1;
 }
 
 int AVL::ComputeHeight(Node* node)

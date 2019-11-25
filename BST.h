@@ -8,16 +8,17 @@
 
 #pragma once
 
-#include "Tree.h"
+#include "Constants.h"
 
-class BST : Tree
+class BST
 {
 public:
 	BST();
 	void Insert(const char* cArray);
 	void Search(const char* cArray);
 	int GetHeight();
-	int GetApproxWorkDone();
+	int GetReadCount();
+	int GetWriteCount();
 	int GetUnique();
 	int GetNonUnique();
 
@@ -25,7 +26,7 @@ private:
 
 	struct Node
 	{
-		char name[50]{};
+		char name[MAX_DATA_LENGTH]{};
 		int count;
 		Node* parent;
 		Node* left;
@@ -35,8 +36,8 @@ private:
 	};
 
 	Node* root;
-	unsigned int keyComparisonCount;
-	unsigned int nodeLinkChangeCount;
+	unsigned int readCount;
+	unsigned int writeCount;
 	Node* Find(const char* cArray);
 	int TraverseNonUnique(Node* node);
 	int TraverseUnique(Node* node);

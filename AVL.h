@@ -8,16 +8,17 @@
 
 #pragma once
 
-#include "Tree.h"
+#include "Constants.h"
 
-class AVL : Tree
+class AVL
 {
 public:
 	AVL();
 	void Insert(const char* x);
 	void Search(const char* cArray);
 	int GetHeight();
-	int GetApproxWorkDone();
+	int GetReadCount();
+	int GetWriteCount();
 	int GetUnique();
 	int GetNonUnique();
 
@@ -25,18 +26,18 @@ private:
 
 	struct Node
 	{
-		char data[50]{};
+		char data[MAX_DATA_LENGTH]{};
 		int count;
 		Node* left;
 		Node* right;
 		int bf;
-		
+
 		Node(const char* name, const int count, Node* left, Node* right, int balanceFactor);
 	};
 
 	Node* root;
-	unsigned int keyComparisonCount;
-	unsigned int bfChangeCount;
+	unsigned int readCount;
+	unsigned int writeCount;
 	Node* Find(const char* cArray);
 	int TraverseNonUnique(Node* node);
 	int TraverseUnique(Node* node);

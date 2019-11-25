@@ -13,20 +13,29 @@ BTreeNode::BTreeNode()
 {
 	recordId = 0;
 	n = 0;
-	isLeaf = true;
-	count = 1;
+	isLeaf = false;
 	for (int i = 0; i < MAX_KEY + 1; i++)
-		memset(keys[i], 0, MAX_DATA_LENGTH * sizeof(char));
-	memset(childRecordId, 0, (MAX_CHILDREN + 1) * sizeof(int));
+		memset(keys[i], 0, sizeof(keys[i]));
+	memset(counts, 0, sizeof(counts));
+	memset(childRecordId, 0, sizeof(childRecordId));
 }
 
 BTreeNode::BTreeNode(int recordId)
 {
 	this->recordId = recordId;
 	n = 0;
-	isLeaf = true;
-	count = 1;
+	isLeaf = false;
 	for (int i = 0; i < MAX_KEY + 1; i++)
-		memset(keys[i], 0, MAX_DATA_LENGTH * sizeof(char));
-	memset(childRecordId, 0, (MAX_CHILDREN + 1) * sizeof(int));
+		memset(keys[i], 0, sizeof(keys[i]));
+	memset(counts, 0, sizeof(counts));
+	memset(childRecordId, 0, sizeof(childRecordId));
+}
+
+int BTreeNode::GetKeyCount()
+{
+	int count = 0;
+	for(int i = 0; i < MAX_KEY + 1; i++)
+		if(strcmp(keys[i], "") != 0)
+			count++;
+	return count;
 }
